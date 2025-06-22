@@ -109,6 +109,40 @@
         </div>
     </div>
 
+    <!-- Offcanvas Right -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasRightLabel">Configurações da Nota</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <form>
+                <div class="mb-3">
+                    <label for="operacaoRecebimento" class="form-label">Operação de Recebimento</label>
+                    <select class="form-select" id="operacaoRecebimento">
+                        <option value="">Selecione uma operação</option>
+                        <option value="servico">Prestação de Serviço</option>
+                        <option value="consultoria">Consultoria</option>
+                        <option value="manutencao">Manutenção</option>
+                        <option value="suporte">Suporte Técnico</option>
+                        <option value="desenvolvimento">Desenvolvimento</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="dataEntrada" class="form-label">Data Entrada</label>
+                    <input type="date" class="form-control" id="dataEntrada">
+                </div>
+                
+                <div class="d-grid">
+                    <button type="button" class="btn btn-success btn-lg" id="btnEfetivar">
+                        <i class="fas fa-check me-2"></i>Efetivar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="container-fluid">
         <!-- Stats Cards -->
         <div class="row mb-4">
@@ -197,7 +231,7 @@
                             <td>R$ 2.500,00</td>
                             <td><span class="status-efetivada">Efetivada</span></td>
                             <td>
-                                <button class="btn btn-outline-secondary btn-action" title="Configurações">
+                                <button class="btn btn-outline-secondary btn-action" title="Configurações" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
                                     <i class="fas fa-cog"></i>
                                 </button>
                             </td>
@@ -212,7 +246,7 @@
                             <td>R$ 1.800,00</td>
                             <td><span class="status-rascunho">Rascunho</span></td>
                             <td>
-                                <button class="btn btn-outline-secondary btn-action" title="Configurações">
+                                <button class="btn btn-outline-secondary btn-action" title="Configurações" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
                                     <i class="fas fa-cog"></i>
                                 </button>
                             </td>
@@ -227,7 +261,7 @@
                             <td>R$ 3.200,00</td>
                             <td><span class="status-efetivada">Efetivada</span></td>
                             <td>
-                                <button class="btn btn-outline-secondary btn-action" title="Configurações">
+                                <button class="btn btn-outline-secondary btn-action" title="Configurações" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
                                     <i class="fas fa-cog"></i>
                                 </button>
                             </td>
@@ -242,7 +276,7 @@
                             <td>R$ 4.750,00</td>
                             <td><span class="status-rascunho">Rascunho</span></td>
                             <td>
-                                <button class="btn btn-outline-secondary btn-action" title="Configurações">
+                                <button class="btn btn-outline-secondary btn-action" title="Configurações" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
                                     <i class="fas fa-cog"></i>
                                 </button>
                             </td>
@@ -309,13 +343,54 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
+        let currentRow = null;
+
         // Adicionar interatividade aos botões de ação
         document.querySelectorAll('.btn-action').forEach(btn => {
             btn.addEventListener('click', function() {
-                const row = this.closest('tr');
-                const numero = row.cells[4].textContent;
-                alert(`Configurações para Nota ${numero}`);
+                currentRow = this.closest('tr');
+                const numero = currentRow.cells[4].textContent;
+                const emitente = currentRow.cells[2].textContent;
+                
+                // Atualizar título do offcanvas
+                document.getElementById('offcanvasRightLabel').textContent = `Nota ${numero} - ${emitente}`;
+                
+                // Definir data atual por padrão
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('dataEntrada').value = today;
             });
+        });
+
+        // Funcionalidade do botão Efetivar
+        document.getElementById('btnEfetivar').addEventListener('click', function() {
+            if (!currentRow) return;
+            
+            const operacao = document.getElementById('operacaoRecebimento').value;
+            const dataEntrada = document.getElementById('dataEntrada').value;
+            
+            if (!operacao) {
+                alert('Por favor, selecione uma operação de recebimento.');
+                return;
+            }
+            
+            if (!dataEntrada) {
+                alert('Por favor, informe a data de entrada.');
+                return;
+            }
+            
+            // Atualizar o status na tabela
+            const statusCell = currentRow.cells[7];
+            statusCell.innerHTML = '<span class="status-efetivada">Efetivada</span>';
+            
+            // Fechar o offcanvas
+            const offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('offcanvasRight'));
+            offcanvas.hide();
+            
+            // Limpar formulário
+            document.getElementById('operacaoRecebimento').value = '';
+            document.getElementById('dataEntrada').value = '';
+            
+            alert(`Nota efetivada com sucesso!\nOperação: ${document.querySelector('#operacaoRecebimento option[value="' + operacao + '"]').textContent}\nData: ${new Date(dataEntrada).toLocaleDateString('pt-BR')}`);
         });
 
         // Simular funcionalidade de pesquisa
