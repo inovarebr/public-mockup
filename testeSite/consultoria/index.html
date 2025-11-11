@@ -518,8 +518,28 @@
             };
             initialAnimate('.intro-text', 0.2); 
 
+            // Animação inicial das obrigações: aplicar classe 'animated' já na abertura da página
+            const animateObligationsImmediately = () => {
+                obligationItems.forEach((item, index) => {
+                    const delay = index * 100; // 100ms entre cada item
+                    setTimeout(() => {
+                        item.classList.add('animated');
+                        const text = item.querySelector('.obligation-text');
+                        if (text) text.classList.add('animated');
+                        const numberEl = item.querySelector('.obligation-number');
+                        if (numberEl) {
+                            numberEl.classList.add('pulse');
+                            setTimeout(() => numberEl.classList.remove('pulse'), 1000);
+                        }
+                    }, delay);
+                });
+            };
+
+            // Executa animação inicial
+            animateObligationsImmediately();
+
             window.addEventListener('scroll', handleScroll);
-            
+
             handleScroll();
         });
     </script>
