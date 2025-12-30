@@ -225,6 +225,11 @@
             transition: opacity .5s ease-out, transform .5s ease-out;
         }
 
+        /* Garantir layout previsível e evitar distorção */
+        .obligation-item { width: 100%; box-sizing: border-box; }
+        .obligation-number { flex: 0 0 40px; box-sizing: border-box; }
+        .obligation-text { flex: 1 1 auto; min-width: 0; box-sizing: border-box; overflow-wrap: break-word; overflow: auto; }
+
         .obligation-text.animated {
             opacity: 1;
             transform: translateX(0);
@@ -540,6 +545,30 @@
                     }
                 });
             }
+
+            // Equalizar alturas das caixas de texto das obrigações em telas pequenas
+            const equalizeObligationHeights = () => {
+                if (!obligationTexts || !obligationTexts.length) return;
+                if (window.innerWidth <= 480) {
+                    // reset antes de medir
+                    obligationTexts.forEach(el => el.style.height = 'auto');
+                    let maxH = 0;
+                    obligationTexts.forEach(el => {
+                        const h = el.scrollHeight;
+                        if (h > maxH) maxH = h;
+                    });
+                    obligationTexts.forEach(el => el.style.height = (maxH) + 'px');
+                } else {
+                    obligationTexts.forEach(el => el.style.height = '');
+                }
+            };
+            // chamar inicialmente e no resize
+            equalizeObligationHeights();
+            window.addEventListener('resize', () => {
+                // debounce simples
+                clearTimeout(window.__equalizeTimeout);
+                window.__equalizeTimeout = setTimeout(equalizeObligationHeights, 120);
+            });
 
             window.addEventListener('scroll', handleScroll);
             handleScroll();
